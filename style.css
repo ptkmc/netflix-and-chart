@@ -34,7 +34,7 @@ body {
 }
 .info-panel {
   grid-column: 4;
-  grid-row: 1 / 10;
+  grid-row: 1 / 5;
   text-align: center;
 }
 .chart-panel {
@@ -63,6 +63,10 @@ body {
   .info-panel {
     grid-column: 1;
     grid-row: 3;
+  }
+
+  .light-tick {
+    display: none;
   }
 }
 
