@@ -16,41 +16,40 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="mainGrid" class="ui stackable centered grid">
-      <div id="topPanel" class="top-panel ten wide column ui segment">
+    <div class="main">
+      <div id="topPanel" class="top-panel ui segment raised">
         <h1>Netflix Original Drama Films, Rated</h1>
 
-        <div id="yDomainState" class="ui buttons">
+        <div id="yDomainState" class="btn ui buttons">
           <button id="full" class="ui inverted button active">
             Full Scale
           </button>
           <button id="zoom" class="ui inverted button">Zoom</button>
         </div>
 
-        <button id="fullDate" class="ui inverted button">
+        <button id="fullDate" class="btn ui inverted button">
           Full Date
         </button>
 
-        <button id="connectDots" class="ui inverted button">
+        <button id="connectDots" class="btn ui inverted button">
           Connect Dots
         </button>
 
-        <button id="lucky" class="ui button inverted">
+        <button id="lucky" class="btn ui button inverted">
           Feeling Lucky
         </button>
       </div>
-      <div class="four wide column"></div>
 
-      <div id="chartPanel" class="ten wide column ui segment raised">
+      <div id="chartPanel" class="chart-panel ui segment raised">
         <svg></svg>
       </div>
 
-      <div id="infoPanel" class="four wide column ui segment raised">
+      <div id="infoPanel" class="info-panel ui segment raised">
         <a id="infoWebsite" href="#">
           <div class="ui centered container fluid poster-frame">
             <img id="poster-background" class="blur" src="#" />
-            <div class="poster">
-              <img id="poster" class="ui raised segment" src="#" />
+            <div class="poster-outer">
+              <img id="poster" class="poster ui raised segment" src="#" />
             </div>
           </div>
 

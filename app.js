@@ -38,7 +38,7 @@ d3.json('./netflix_film_data.json').then(data => {
     .range([0, width]);
 
   let yDomainState = 'full';
-  let dateState = 'year';
+  let fullDate = false;
   let lineState = false;
 
   document.querySelector('#yDomainState').addEventListener('click', () => {
@@ -48,6 +48,73 @@ d3.json('./netflix_film_data.json').then(data => {
     document.querySelector(`#${yDomainState}`).classList += ' active';
     updateY();
   });
+
+  d3.select('#fullDate').on('click', () => {
+    dateBtn = d3.select('#fullDate');
+    fullDate = !fullDate;
+    fullDate
+      ? dateBtn.classed('active', true)
+      : dateBtn.classed('active', false);
+    updateDate();
+  });
+
+  function updateDate() {
+    const xAxis = svg.select('.x-axis').transition();
+    let released = currentFilm ? currentFilm.Year : '';
+    if (currentFilm && currentFilm.Released !== 'N/A') {
+      released = currentFilm.Released;
+    }
+    const fullOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    let axisYear;
+
+    if (fullDate) {
+      xAxis.call(
+        d3
+          .axisBottom(xScale)
+          .tickSize(0)
+          .tickFormat(date => {
+            const currentYear = Date.parse(d3.timeYear(date));
+            if (!axisYear || axisYear !== currentYear) {
+              axisYear = currentYear;
+              return d3.timeFormat('%Y')(date);
+            } else {
+              return d3.timeFormat('%b')(date);
+            }
+          })
+      );
+      if (released) {
+        d3.select('.info-year')
+          .text(released.toLocaleDateString('en-US', fullOptions).toUpperCase())
+          .classed('year', true);
+      }
+      const ticks = d3.selectAll('.tick').nodes();
+      for (let tick in ticks) {
+        const thisTick = d3.select(ticks[tick]);
+        // Ticks being transitioned in have length of 0
+        if (thisTick.text().length === 0 || thisTick.text().length === 3) {
+          thisTick.classed('light-tick', true);
+        } else {
+          thisTick.classed('light-tick', false);
+        }
+      }
+    } else {
+      xAxis.call(
+        d3
+          .axisBottom(xScale)
+          .tickSize(0)
+          .ticks(d3.timeYear)
+      );
+      if (currentFilm) {
+        d3.select('.info-year')
+          .text(`(${currentFilm.Year})`)
+          .classed('year', false);
+      }
+    }
+  }
 
   function updateY() {
     svg
@@ -110,7 +177,7 @@ d3.json('./netflix_film_data.json').then(data => {
     .append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  let axisYear;
+  // let axisYear;
 
   svg
     .append('g')
@@ -120,17 +187,6 @@ d3.json('./netflix_film_data.json').then(data => {
       d3
         .axisBottom(xScale)
         .tickSize(0)
-        // 'Show Months' FEATURE
-        // ===========================
-        // .tickFormat(date => {
-        //   const currentYear = Date.parse(d3.timeYear(date));
-        //   if (!axisYear || axisYear !== currentYear) {
-        //     axisYear = currentYear;
-        //     return d3.timeFormat('%Y')(date);
-        //   } else {
-        //     return d3.timeFormat('%b')(date);
-        //   }
-        // })
         .ticks(d3.timeYear)
     );
 
@@ -211,7 +267,10 @@ d3.json('./netflix_film_data.json').then(data => {
     return tooltip.style('visibility', 'hidden');
   }
 
+  let currentFilm;
+
   function handleClick(d) {
+    currentFilm = d;
     console.log(d);
     const fontSize = parseFloat(
       getComputedStyle(document.querySelector('#infoPanel')).fontSize
@@ -239,9 +298,8 @@ d3.json('./netflix_film_data.json').then(data => {
       )
       .attr('target', '_blank');
 
-    d3.select('#infoTitle').html(
-      `${d.Title} <span class="info-year">(${d.Year})</span>`
-    );
+    d3.select('#infoTitle').html(`${d.Title} <span class="info-year"></span>`);
+    updateDate();
 
     // Update Ratings
     const ratingsIds = {
