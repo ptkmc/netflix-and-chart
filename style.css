@@ -1,0 +1,237 @@
+/* http://paletton.com/#uid=3030u0kltw0bDObh5EupUtvtbnV */
+@font-face {
+  font-family: 'Bebas Kai';
+  src: local('Bebas Kai'), local('Bebas-Kai'),
+    url('fonts/BebasKai.otf') format('opentype');
+}
+
+.top-panel h1 {
+  font-family: 'Bebas Kai' !important;
+}
+
+h1 {
+  /* font-family: 'Bebas Kai' !important; */
+}
+
+body {
+  background-color: rgb(233, 233, 233);
+}
+
+#mainGrid {
+  margin-top: 1em;
+}
+
+#topPanel {
+  margin: 0 1em 1em 0;
+  padding: 1em;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+}
+
+#yDomainState {
+  margin-right: 0.25em !important;
+  /* margin-top: 0; */
+}
+
+#chartPanel {
+  margin: 0 1em 0 0;
+  padding: 1em;
+  height: 600px;
+}
+
+#infoPanel {
+  /* visibility: hidden; */
+  text-align: center;
+  margin-top: 0;
+  padding-top: 1em;
+  background: rgba(0, 0, 0, 0.8);
+  /* background-color: #444; */
+  color: #fff;
+  /* border: 4px solid #8bced7; */
+}
+
+.line {
+  fill: none;
+  stroke: #ffab00;
+  stroke-width: 3;
+}
+
+.x-axis,
+.y-axis {
+  font-family: 'Open Sans', 'sans-serif';
+  font-size: 1em;
+  stroke-opacity: 0;
+}
+
+.y-axis line {
+  color: rgba(207, 207, 207, 0.548);
+  stroke-opacity: 100;
+}
+
+.dot {
+  fill: #ff5f54;
+  stroke: #fff;
+}
+
+.dot:hover {
+  fill: #c2f271;
+}
+
+.dot-focus {
+  fill: #8bced7;
+  stroke: #1e8290;
+  stroke-width: 2px;
+}
+
+/* .dot:focus {
+  fill: #ffd45c;
+  stroke: #fff;
+} */
+
+.tooltip {
+  font-family: 'Open Sans', 'sans-serif';
+  /* max-width: 200px; */
+  /* font-weight: bold; */
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.tooltip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: '\25BC';
+  position: absolute;
+  text-align: center;
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+.tooltip-rating {
+  display: inline-block;
+  color: rgb(255, 225, 55);
+  padding: 0 4px 0 4px;
+  border: 1px solid rgb(255, 225, 55);
+}
+
+.tooltip-year {
+  display: inline-block;
+  color: rgb(177, 177, 177);
+}
+
+.header-top {
+  margin: 30px 0 20px 0;
+}
+
+.info-year {
+  font-weight: normal;
+  display: inline;
+  color: rgb(177, 177, 177);
+}
+
+#infoTitle {
+  font-family: 'Open Sans';
+  margin-top: 0.5em;
+  color: #fff;
+  display: block;
+}
+
+.info-rating-group {
+  /* font-weight: normal; */
+  color: rgb(177, 177, 177);
+  margin: 1em 0 0;
+  display: flex;
+  justify-content: center;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  font-weight: bold;
+  font-family: 'Open Sans', 'Lato', 'sans-serif';
+}
+
+.rating-container {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  /* flex-wrap: wrap; */
+}
+
+.info-rating {
+  margin-bottom: 0.5em;
+  display: flex;
+  align-items: flex-start;
+  width: 5.2em;
+  flex-wrap: wrap;
+}
+
+/* .info-rating-imdb {
+  display: flex;
+  flex-wrap: wrap;
+} */
+
+.info-rating-icon {
+  display: inline-block;
+  width: 2em;
+  margin-right: 5px;
+}
+
+.info-rating-icon {
+  fill: #ff0000;
+}
+
+#infoVotes {
+  display: block;
+  font-size: 14px;
+  margin-top: 0em;
+  color: rgb(177, 177, 177);
+  font-weight: normal;
+}
+
+.poster-frame {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+}
+
+.poster {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  max-height: 400px;
+}
+
+#poster {
+  max-height: 400px;
+  position: relative;
+  left: -50%;
+  padding: 0;
+  border: 0px;
+}
+
+.blur {
+  filter: blur(6px);
+  max-height: 400px;
+  opacity: 0.66;
+}
+
+#infoSub {
+  margin-top: 0em;
+  color: rgb(177, 177, 177);
+}
+
+#infoPlot {
+  text-align: left;
+  /* text-justify: inter-word; */
+}
+
+#imdbRating::after {
+}
