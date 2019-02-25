@@ -25,8 +25,11 @@ const margin = { top: 10, right: 30, bottom: 20, left: 20 },
 var parseDate = d3.timeParse('%Y-%m-%d');
 
 d3.json('./netflix_film_data.json').then(data => {
+  console.time('setup');
+  let filmIds = [];
   data.forEach(film => {
     film.Released = new Date(film.Released);
+    filmIds.push(film.imdbID);
   });
   data = data.sort((a, b) => {
     return b.Released - a.Released;
@@ -50,13 +53,57 @@ d3.json('./netflix_film_data.json').then(data => {
   });
 
   d3.select('#fullDate').on('click', () => {
-    dateBtn = d3.select('#fullDate');
     fullDate = !fullDate;
+    dateBtn = d3.select('#fullDate');
     fullDate
       ? dateBtn.classed('active', true)
       : dateBtn.classed('active', false);
     updateDate();
   });
+
+  d3.select('#lucky').on('click', () => {
+    handleClick(
+      d3
+        .select(`#${filmIds[Math.floor(Math.random() * filmIds.length)]}`)
+        .datum()
+    );
+
+    document.querySelector('#lucky').blur();
+  });
+
+  // d3.select('#connectDots').on('click', () => {
+  //   lineState = !lineState;
+  //   connectBtn = d3.select('#connectDots');
+  //   lineState
+  //     ? connectBtn.classed('active', true)
+  //     : connectBtn.classed('active', false);
+
+  //   d3.select('.line').remove();
+
+  //   if (lineState === true) {
+  //     svg
+  //       .append('path')
+  //       .datum(data)
+  //       .attr('class', 'line')
+  //       .attr('d', line);
+
+  //     svg.selectAll('.dot').remove();
+  //   }
+
+  //   svg
+  //     .selectAll('.dot')
+  //     .data(data)
+  //     .enter()
+  //     .append('circle')
+  //     .attr('id', d => d.imdbID)
+  //     .attr('class', 'dot')
+  //     .attr('cx', d => xScale(d.Released))
+  //     .attr('cy', d => yScale(d.imdbRating))
+  //     .attr('r', d => getRadius(d))
+  //     .on('mouseover', handleMouseOver)
+  //     .on('mouseout', handleMouseOut)
+  //     .on('click', handleClick);
+  // });
 
   function updateDate() {
     const xAxis = svg.select('.x-axis').transition();
@@ -94,7 +141,7 @@ d3.json('./netflix_film_data.json').then(data => {
       const ticks = d3.selectAll('.tick').nodes();
       for (let tick in ticks) {
         const thisTick = d3.select(ticks[tick]);
-        // Ticks being transitioned in have length of 0
+        // Ticks still being transitioned in have length of 0
         if (thisTick.text().length === 0 || thisTick.text().length === 3) {
           thisTick.classed('light-tick', true);
         } else {
@@ -196,14 +243,6 @@ d3.json('./netflix_film_data.json').then(data => {
     .attr('transform', `translate(${chartPanelWidth})`)
     .call(d3.axisLeft(yScale).tickSize(chartPanelWidth));
 
-  // 'Connect the dots' FEATURE
-  // ===========================
-  // svg
-  //   .append('path')
-  //   .datum(data)
-  //   .attr('class', 'line');
-  // .attr('d', line);
-
   const getRadius = d => {
     return rScale(parseInt(d.imdbVotes.replace(',', '')));
   };
@@ -220,10 +259,7 @@ d3.json('./netflix_film_data.json').then(data => {
     .attr('r', d => getRadius(d))
     .on('mouseover', handleMouseOver)
     .on('mouseout', handleMouseOut)
-    .on('click', handleClick)
-    .on('load', () => {
-      console.log('loooad');
-    });
+    .on('click', handleClick);
 
   const tooltip = d3
     .select('body')
@@ -279,7 +315,7 @@ d3.json('./netflix_film_data.json').then(data => {
     d3.selectAll('.dot-focus')
       .classed('dot-focus', false)
       .classed('dot', true);
-    d3.select(this).attr('class', 'dot dot-focus');
+    d3.select(`#${d.imdbID}`).attr('class', 'dot dot-focus');
 
     d3.selectAll('#poster')
       .style('max-width', infoPanelWidth - fontSize * 2 + 'px')
@@ -297,6 +333,11 @@ d3.json('./netflix_film_data.json').then(data => {
           : d.Website
       )
       .attr('target', '_blank');
+
+    d3.select('.info-rating-imdb')
+      .attr('href', `https://www.imdb.com/title/${d.imdbID}`)
+      .attr('target', '_blank')
+      .style('color', 'inherit');
 
     d3.select('#infoTitle').html(`${d.Title} <span class="info-year"></span>`);
     updateDate();
@@ -336,4 +377,14 @@ d3.json('./netflix_film_data.json').then(data => {
 
     d3.select('#infoPlot').text(d.Plot);
   }
+
+  window.addEventListener('load', () => {
+    handleClick(d3.select('#tt4357394').datum());
+    document.querySelector('#poster').addEventListener('load', () => {
+      document.querySelector('#infoPanel').classList.remove('hidden');
+    });
+  });
+  console.timeEnd('setup');
 });
+// .then(() => {
+// });

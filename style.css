@@ -40,7 +40,7 @@ body {
 .chart-panel {
   grid-column: 1 / 4;
   grid-row: 2 / 4;
-  min-height: 600px;
+  min-height: 560px;
   background-color: #fff !important;
   color: rgba(0, 0, 0, 0.8);
 }
@@ -68,6 +68,10 @@ body {
   .light-tick {
     display: none;
   }
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 .btn {
