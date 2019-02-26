@@ -18,24 +18,27 @@
   <body>
     <div class="main">
       <div id="topPanel" class="top-panel ui segment raised">
-        <h1>Netflix Original Drama Films, Rated</h1>
-
-        <div id="yDomainState" class="btn ui buttons">
+        <h1>Netflix Original Drama Films</h1>
+        <div id="zoomBtn" class="btn ui buttons">
           <button id="full" class="ui inverted button active">
             Full Scale
           </button>
           <button id="zoom" class="ui inverted button">Zoom</button>
         </div>
-
-        <button id="fullDate" class="btn ui inverted button">
-          Full Date
-        </button>
-        <!-- <button id="connectDots" class="btn ui inverted button">
-          Connect Dots
-        </button> -->
-        <button id="lucky" class="btn ui button inverted">
+        <button id="lucky" class="btn ui inverted button">
           Feeling Lucky
         </button>
+
+        <div class="toggle-boxes">
+          <div class="ui checkbox toggle-box">
+            <input id="avgRating" type="checkbox" />
+            <label for="" style="color: #fff">Average</label>
+          </div>
+          <div class="ui checkbox toggle-box">
+            <input id="fullDate" type="checkbox" />
+            <label for="" style="color: #fff">Full Date</label>
+          </div>
+        </div>
       </div>
 
       <div id="chartPanel" class="chart-panel ui segment raised">

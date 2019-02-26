@@ -70,8 +70,23 @@ body {
   }
 }
 
+.toggle-boxes {
+  display: inline;
+  margin-left: 1em;
+}
+
+.toggle-box {
+  margin-right: 1em;
+}
+
 .hidden {
   visibility: hidden;
+}
+
+.mean-line {
+  stroke: #ff5f5446;
+  stroke-width: 4px;
+  /* stroke-dasharray: 14; */
 }
 
 .btn {
@@ -90,12 +105,6 @@ body {
 #zoom.active:focus {
   background: #fff !important;
   color: rgba(0, 0, 0, 0.8) !important;
-}
-
-.line {
-  fill: none;
-  stroke: #ffab00;
-  stroke-width: 3;
 }
 
 .x-axis,

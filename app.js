@@ -18,11 +18,9 @@ let topPanelHeight = d3
   .node()
   .getBoundingClientRect().height;
 
-const margin = { top: 10, right: 30, bottom: 20, left: 20 },
+const margin = { top: 14, right: 30, bottom: 20, left: 20 },
   width = chartPanelWidth - 30 - margin.left - margin.right,
   height = chartPanelHeight - 30 - margin.top - margin.bottom;
-
-var parseDate = d3.timeParse('%Y-%m-%d');
 
 d3.json('./netflix_film_data.json').then(data => {
   console.time('setup');
@@ -35,24 +33,26 @@ d3.json('./netflix_film_data.json').then(data => {
     return b.Released - a.Released;
   });
 
-  const xScale = d3
-    .scaleTime()
-    .domain([d3.min(data, d => d.Released), d3.max(data, d => d.Released)])
-    .range([0, width]);
+  const mean = d3.mean(data, d => d.imdbRating);
 
-  let yDomainState = 'full';
+  let yScaleZoom = false;
   let fullDate = false;
-  let lineState = false;
+  let showMeanLine = false;
 
-  document.querySelector('#yDomainState').addEventListener('click', () => {
-    yDomainState === 'full' ? (yDomainState = 'zoom') : (yDomainState = 'full');
-    document.querySelector('#full').classList.remove('active');
-    document.querySelector('#zoom').classList.remove('active');
-    document.querySelector(`#${yDomainState}`).classList += ' active';
+  d3.select('#zoomBtn').on('click', () => {
+    console.log('zoomie');
+    yScaleZoom = !yScaleZoom;
+    if (yScaleZoom) {
+      d3.select('#full').classed('active', false);
+      d3.select('#zoom').classed('active', true);
+    } else {
+      d3.select('#full').classed('active', true);
+      d3.select('#zoom').classed('active', false);
+    }
     updateY();
   });
 
-  d3.select('#fullDate').on('click', () => {
+  d3.select('#fullDate').on('input', () => {
     fullDate = !fullDate;
     dateBtn = d3.select('#fullDate');
     fullDate
@@ -71,39 +71,13 @@ d3.json('./netflix_film_data.json').then(data => {
     document.querySelector('#lucky').blur();
   });
 
-  // d3.select('#connectDots').on('click', () => {
-  //   lineState = !lineState;
-  //   connectBtn = d3.select('#connectDots');
-  //   lineState
-  //     ? connectBtn.classed('active', true)
-  //     : connectBtn.classed('active', false);
-
-  //   d3.select('.line').remove();
-
-  //   if (lineState === true) {
-  //     svg
-  //       .append('path')
-  //       .datum(data)
-  //       .attr('class', 'line')
-  //       .attr('d', line);
-
-  //     svg.selectAll('.dot').remove();
-  //   }
-
-  //   svg
-  //     .selectAll('.dot')
-  //     .data(data)
-  //     .enter()
-  //     .append('circle')
-  //     .attr('id', d => d.imdbID)
-  //     .attr('class', 'dot')
-  //     .attr('cx', d => xScale(d.Released))
-  //     .attr('cy', d => yScale(d.imdbRating))
-  //     .attr('r', d => getRadius(d))
-  //     .on('mouseover', handleMouseOver)
-  //     .on('mouseout', handleMouseOut)
-  //     .on('click', handleClick);
-  // });
+  d3.select('#avgRating').on('input', () => {
+    const meanLine = d3.select('.mean-line');
+    showMeanLine = !showMeanLine;
+    showMeanLine
+      ? meanLine.classed('hidden', false)
+      : meanLine.classed('hidden', true);
+  });
 
   function updateDate() {
     const xAxis = svg.select('.x-axis').transition();
@@ -184,17 +158,30 @@ d3.json('./netflix_film_data.json').then(data => {
       .selectAll('.dot')
       .transition()
       .attr('cy', d => yScale.domain(getYDomain())(d.imdbRating));
+
+    svg
+      .select('.mean-line')
+      .transition()
+      .attr('x1', xScale(d3.min(data, d => d.Released)))
+      .attr('y1', yScale(mean))
+      .attr('x2', xScale(d3.max(data, d => d.Released)) + 20)
+      .attr('y2', yScale(mean));
   }
 
   function getYDomain() {
-    if (yDomainState === 'zoom') {
+    if (yScaleZoom) {
       return [d3.min(data, d => d.imdbRating), d3.max(data, d => d.imdbRating)];
     } else {
       return [0, 10];
     }
   }
 
-  var yScale = d3
+  const xScale = d3
+    .scaleTime()
+    .domain([d3.min(data, d => d.Released), d3.max(data, d => d.Released)])
+    .range([0, width]);
+
+  const yScale = d3
     .scaleLinear()
     .domain(getYDomain())
     .range([height, 0]);
@@ -207,24 +194,12 @@ d3.json('./netflix_film_data.json').then(data => {
     ])
     .range([6, 18]);
 
-  var line = d3
-    .line()
-    .x(function(d, i) {
-      return xScale(d.Released);
-    })
-    .y(function(d) {
-      return yScale(d.imdbRating);
-    });
-  // .curve(d3.curveMonotoneX); // apply smoothing to the line
-
-  var svg = d3
+  const svg = d3
     .select('svg')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom)
     .append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-  // let axisYear;
 
   svg
     .append('g')
@@ -246,6 +221,14 @@ d3.json('./netflix_film_data.json').then(data => {
   const getRadius = d => {
     return rScale(parseInt(d.imdbVotes.replace(',', '')));
   };
+
+  svg
+    .append('line')
+    .attr('x1', xScale(d3.min(data, d => d.Released)))
+    .attr('y1', yScale(mean))
+    .attr('x2', xScale(d3.max(data, d => d.Released)) + 20)
+    .attr('y2', yScale(mean))
+    .attr('class', 'mean-line hidden');
 
   svg
     .selectAll('.dot')
@@ -270,13 +253,18 @@ d3.json('./netflix_film_data.json').then(data => {
 
   let chartPos = document.getElementById('chartPanel').getBoundingClientRect();
 
-  function handleMouseOver(d, i) {
+  function handleMouseOver(d) {
     let tip = tooltip
       .style('visibility', 'visible')
       .attr('id', d.imdbID)
       .style(
         'top',
-        yScale(d.imdbRating) + chartPos.top - getRadius(d) + 13 + 'px'
+        yScale(d.imdbRating) +
+          chartPos.top -
+          getRadius(d) +
+          margin.top +
+          3 +
+          'px'
       )
       .style(
         'left',
@@ -342,7 +330,6 @@ d3.json('./netflix_film_data.json').then(data => {
     d3.select('#infoTitle').html(`${d.Title} <span class="info-year"></span>`);
     updateDate();
 
-    // Update Ratings
     const ratingsIds = {
       'Internet Movie Database': '#imdbRating',
       'Rotten Tomatoes': '#rottenTomatoesRating',
@@ -368,7 +355,6 @@ d3.json('./netflix_film_data.json').then(data => {
 
     d3.select('#infoVotes').text(d.imdbVotes);
 
-    // Update Subheader Information
     d3.select('#infoSub').text(
       `${d.Rated === 'N/A' ? '' : d.Rated + ' | '}
       ${d.Genre === 'N/A' ? '' : d.Genre} 
@@ -386,5 +372,3 @@ d3.json('./netflix_film_data.json').then(data => {
   });
   console.timeEnd('setup');
 });
-// .then(() => {
-// });
