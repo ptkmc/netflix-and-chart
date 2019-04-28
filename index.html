@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Netflix Originals</title>
+    <title>Netflix and Chart</title>
+    <link rel="icon" href="favicon.png" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
@@ -13,22 +14,30 @@
       href="https://fonts.googleapis.com/css?family=Open+Sans"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+      integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
+      crossorigin="anonymous"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="main">
       <div id="topPanel" class="top-panel ui segment raised">
         <h1>Netflix Original Drama Films</h1>
-        <div id="zoomBtn" class="btn ui buttons">
-          <button id="full" class="ui inverted button active">
+        <div id="zoomBtn" class="ui buttons">
+          <button id="full" class="btn ui inverted button active">
             Full Scale
           </button>
-          <button id="zoom" class="ui inverted button">Zoom</button>
+          <button id="zoom" class="btn ui inverted button">
+            Zoom
+            <i class="fas fa-expand"></i>
+          </button>
         </div>
         <button id="lucky" class="btn ui inverted button">
           Feeling Lucky
         </button>
-
         <div class="toggle-boxes">
           <div class="ui checkbox toggle-box">
             <input id="avgRating" type="checkbox" />
@@ -45,66 +54,62 @@
         <svg></svg>
       </div>
 
-      <div id="infoPanel" class="info-panel ui segment raised hidden">
-        <a id="infoWebsite" href="#">
-          <div class="ui centered container fluid poster-frame">
-            <img id="poster-background" class="blur" src="#" />
-            <div class="poster-outer">
-              <img id="poster" class="poster ui raised segment" src="#" />
+      <div id="infoPanel" class="info-panel ui segment raised">
+        <div id="infoInner" class="hidden">
+          <a id="infoWebsite" href="#">
+            <div class="ui centered container fluid poster-frame">
+              <img id="posterBackground" class="blur" src="#" />
+              <div class="poster-outer">
+                <img id="poster" class="poster ui raised segment" src="#" />
+              </div>
             </div>
-          </div>
-
-          <h2 id="infoTitle">Title <span class="info-year">(1234)</span></h2>
-        </a>
-
-        <h3 class="info-rating-group">
-          <a class="info-rating info-rating-imdb">
-            <div class="rating-container">
-              <img
-                class="info-rating-icon"
-                src="./icons/imdb.svg"
-                alt="IMDb rating"
-                title="IMDb Rating"
-              />
-              <span id="imdbRating" class="rating-value">7.0</span>
+            <div class="info-header">
+              <h2 id="infoTitle"></h2>
+              <span id="infoYear" class=""></span>
             </div>
-            <p id="infoVotes">150,000</p>
           </a>
-          <div class="info-rating">
-            <div class="rating-container">
-              <img
-                class="info-rating-icon"
-                src="./icons/rotten-tomatoes.svg"
-                alt="Rotten Tomatoes rating"
-                title="Rotten Tomatoes Rating"
-              />
-              <span id="rottenTomatoesRating">70 </span>
+          <h3 class="info-rating-group">
+            <a id="infoImdbLink" class="info-rating">
+              <div class="rating-container">
+                <img
+                  class="info-rating-icon"
+                  src="./icons/imdb.svg"
+                  alt="IMDb rating"
+                  title="IMDb Rating"
+                />
+                <span id="imdbRating" class="rating-value"></span>
+              </div>
+              <p id="infoVotes"></p>
+            </a>
+            <div class="info-rating">
+              <div class="rating-container">
+                <img
+                  class="info-rating-icon"
+                  src="./icons/rotten-tomatoes.svg"
+                  alt="Rotten Tomatoes rating"
+                  title="Rotten Tomatoes Rating"
+                />
+                <span id="rottenTomatoesRating"></span>
+              </div>
             </div>
-          </div>
-          <div class="info-rating">
-            <div class="rating-container">
-              <img
-                class="info-rating-icon"
-                src="./icons/metacritic.svg"
-                alt="Metacritic rating"
-                title="Metacritic Rating"
-              />
-              <span id="metacriticRating">70</span>
+            <div class="info-rating">
+              <div class="rating-container">
+                <img
+                  class="info-rating-icon"
+                  src="./icons/metacritic.svg"
+                  alt="Metacritic rating"
+                  title="Metacritic Rating"
+                />
+                <span id="metacriticRating"></span>
+              </div>
             </div>
-          </div>
-        </h3>
-
-        <h4 id="infoSub">info info info info</h4>
-        <p id="infoPlot">
-          Doggo ipsum heckin good boys and girls long bois most angery pupper I
-          have ever seen heckin angery woofer, big ol much ruin diet. Very hand
-          that feed shibe puggorino yapper ruff floofs, long doggo long water
-          shoob corgo adorable doggo mlem, heckin aqua doggo doggo.
-        </p>
+          </h3>
+          <h4 id="infoSub"></h4>
+          <p id="infoPlot"></p>
+        </div>
       </div>
     </div>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="./d3-tip.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

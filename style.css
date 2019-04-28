@@ -1,12 +1,7 @@
-/* http://paletton.com/#uid=3030u0kltw0bDObh5EupUtvtbnV */
-@font-face {
-  font-family: 'Bebas Kai';
-  src: local('Bebas Kai'), local('Bebas-Kai'),
-    url('fonts/BebasKai.otf') format('opentype');
-}
-
-.top-panel h1 {
-  font-family: 'Bebas Kai' !important;
+:root {
+  --main-color: #fff;
+  --secondary-color: rgb(177, 177, 177);
+  --main-bg-color: rgba(0, 0, 0, 0.8);
 }
 
 body {
@@ -14,10 +9,10 @@ body {
 }
 
 .segment {
-  background-color: rgba(0, 0, 0, 0.8) !important;
+  background-color: var(--main-bg-color) !important;
   margin: 0 !important;
   min-width: 0;
-  color: #fff;
+  color: var(--main-color);
 }
 
 .main {
@@ -26,23 +21,29 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 10px;
-  /* grid-auto-rows: minmax(100px, auto); */
 }
+
 .top-panel {
   grid-column: 1 / 4;
   grid-row: 1;
 }
+
 .info-panel {
   grid-column: 4;
   grid-row: 1 / 5;
   text-align: center;
 }
+
 .chart-panel {
   grid-column: 1 / 4;
   grid-row: 2 / 4;
   min-height: 560px;
   background-color: #fff !important;
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--main-bg-color);
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 @media (max-width: 1016px) {
@@ -51,7 +52,6 @@ body {
     max-width: 97%;
     grid-template-columns: 1fr;
   }
-
   .top-panel {
     grid-column: 1;
     grid-row: 1;
@@ -64,47 +64,97 @@ body {
     grid-column: 1;
     grid-row: 3;
   }
-
   .light-tick {
     display: none;
   }
 }
 
+/*-------------------
+      Top Panel
+--------------------*/
+
 .toggle-boxes {
-  display: inline;
-  margin-left: 1em;
+  display: inline-block;
+  margin-top: 5px;
 }
 
 .toggle-box {
   margin-right: 1em;
 }
 
-.hidden {
-  visibility: hidden;
+#zoom {
+  margin-right: 4px !important;
+}
+
+#zoom i {
+  margin-left: 0.5em;
+}
+
+#lucky {
+  margin-right: 1em !important;
+}
+
+.btn:hover {
+  color: var(--main-bg-color) !important;
+}
+
+.btn:focus {
+  background: initial !important;
+  color: var(--main-color) !important;
+}
+
+.btn.active {
+  background: var(--main-color) !important;
+  color: var(--main-bg-color) !important;
+}
+
+@media (max-width: 407px) {
+  .top-panel {
+    text-align: center;
+  }
+  #lucky {
+    margin-top: 5px !important;
+  }
+  .toggle-boxes {
+    display: block;
+  }
+  .toggle-box:first-child {
+    margin-left: 0;
+    margin-right: 1em;
+  }
+}
+
+/*-------------------
+      Chart
+--------------------*/
+
+.legend {
+  rx: 5;
+  ry: 5;
+  stroke: var(--secondary-color);
+  stroke-width: 1px;
+  fill: var(--main-color);
+}
+
+.legend-text {
+  fill: var(--main-bg-color);
+}
+
+.legend-stat {
+  font-family: 'Open Sans', 'sans-serif';
+  font-size: 14px;
+  fill: var(--secondary-color);
+}
+
+.legend-dot {
+  stroke: #ff5f54;
+  stroke-width: 2px;
+  fill: #ff5f5446;
 }
 
 .mean-line {
   stroke: #ff5f5446;
   stroke-width: 4px;
-  /* stroke-dasharray: 14; */
-}
-
-.btn {
-  margin: 0 4px 4px 0 !important;
-}
-
-.btn:focus,
-#full:focus,
-#zoom:focus {
-  background: initial !important;
-  color: #fff !important;
-}
-
-.btn.active:focus,
-#full.active:focus,
-#zoom.active:focus {
-  background: #fff !important;
-  color: rgba(0, 0, 0, 0.8) !important;
 }
 
 .x-axis,
@@ -138,19 +188,19 @@ body {
 .tooltip {
   font-family: 'Open Sans', 'sans-serif';
   padding: 12px;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--main-bg-color);
   color: #fff;
   border-radius: 2px;
 }
 
-/* Creates a small triangle extender for the tooltip */
+/* Triangle extender for the tooltip */
 .tooltip:after {
   box-sizing: border-box;
   display: inline;
   font-size: 10px;
   width: 100%;
   line-height: 1;
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--main-bg-color);
   content: '\25BC';
   position: absolute;
   text-align: center;
@@ -168,35 +218,42 @@ body {
 
 .tooltip-year {
   display: inline-block;
-  color: rgb(177, 177, 177);
+  color: var(--secondary-color);
 }
 
-.info-year {
+.light-tick {
+  color: var(--secondary-color);
+}
+
+/*-------------------
+      Info Panel
+--------------------*/
+
+#infoYear {
   font-weight: normal;
   display: inline;
-  color: rgb(177, 177, 177);
+  color: var(--secondary-color);
+  font-size: 24px;
 }
 
-.year {
+.infoFullDate {
   display: block !important;
-  font-size: 0.8em !important;
+  margin: 0 0 0.8em 0;
+}
+
+.info-header {
+  margin-bottom: 0.8em !important;
 }
 
 #infoTitle {
   font-family: 'Open Sans';
-  margin: 0.5em 0;
+  margin: 0.5em 0.2em;
   color: #fff;
-  display: block;
-}
-
-.light-tick {
-  color: rgb(177, 177, 177);
-  /* color: rgba(207, 207, 207, 0.548); */
+  display: inline-block;
 }
 
 .info-rating-group {
-  /* font-weight: normal; */
-  color: rgb(177, 177, 177);
+  color: var(--secondary-color);
   margin: 0;
   display: flex;
   justify-content: center;
@@ -210,7 +267,6 @@ body {
   flex-basis: 100%;
   display: flex;
   align-items: center;
-  /* flex-wrap: wrap; */
 }
 
 .info-rating {
@@ -235,7 +291,7 @@ body {
   display: block;
   font-size: 14px;
   margin-top: 0em;
-  color: rgb(177, 177, 177);
+  color: var(--secondary-color);
   font-weight: normal;
 }
 
@@ -272,10 +328,10 @@ body {
 
 #infoSub {
   margin-top: 0em;
-  color: rgb(177, 177, 177);
+  color: var(--secondary-color);
 }
 
 #infoPlot {
   text-align: left;
-  /* text-justify: inter-word; */
+  text-justify: inter-word;
 }

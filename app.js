@@ -1,96 +1,109 @@
-let chartPanelWidth = d3
+const chartPanelWidth = d3
   .select('#chartPanel')
   .node()
   .getBoundingClientRect().width;
 
-let chartPanelHeight = d3
+const chartPanelHeight = d3
   .select('#chartPanel')
   .node()
   .getBoundingClientRect().height;
 
-let infoPanelWidth = d3
+const infoPanelWidth = d3
   .select('#infoPanel')
   .node()
   .getBoundingClientRect().width;
 
-let topPanelHeight = d3
-  .select('#topPanel')
-  .node()
-  .getBoundingClientRect().height;
-
 const margin = { top: 14, right: 30, bottom: 20, left: 20 },
-  width = chartPanelWidth - 30 - margin.left - margin.right,
-  height = chartPanelHeight - 30 - margin.top - margin.bottom;
+  width = chartPanelWidth - margin.left - margin.right - 30,
+  height = chartPanelHeight - margin.top - margin.bottom - 30,
+  legendCoords = [20, -7],
+  rScaleRange = [6, 18];
+
+let currentFilm;
+let yScaleZoom = false;
+let fullDate = false;
+let isMeanLineVisible = false;
+let filmIds = [];
+let mean = 0;
+let minVotes = Infinity;
+let maxVotes = 0;
 
 d3.json('./netflix_film_data.json').then(data => {
-  console.time('setup');
-  let filmIds = [];
   data.forEach(film => {
+    const votes = parseInt(film.imdbVotes.replace(/,/g, ''));
     film.Released = new Date(film.Released);
     filmIds.push(film.imdbID);
+    mean += parseFloat(film.imdbRating);
+    minVotes = votes < minVotes ? votes : minVotes;
+    maxVotes = votes > maxVotes ? votes : maxVotes;
   });
   data = data.sort((a, b) => {
-    return b.Released - a.Released;
+    return a.Released - b.Released;
   });
+  mean = mean / data.length;
 
-  const mean = d3.mean(data, d => d.imdbRating);
+  const xScale = d3
+    .scaleTime()
+    .domain([data[0].Released, data[data.length - 1].Released])
+    .range([0, width]);
 
-  let yScaleZoom = false;
-  let fullDate = false;
-  let showMeanLine = false;
+  const yScale = d3
+    .scaleLinear()
+    .domain(getYDomain())
+    .range([height, 0]);
 
-  d3.select('#zoomBtn').on('click', () => {
-    console.log('zoomie');
-    yScaleZoom = !yScaleZoom;
+  const rScale = d3
+    .scaleLinear()
+    .domain([minVotes, maxVotes])
+    .range(rScaleRange);
+
+  const svg = d3
+    .select('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+  const tooltip = d3
+    .select('body')
+    .append('div')
+    .style('position', 'absolute')
+    .style('z-index', '10')
+    .style('visibility', 'hidden');
+
+  function getYDomain() {
     if (yScaleZoom) {
-      d3.select('#full').classed('active', false);
-      d3.select('#zoom').classed('active', true);
+      return [d3.min(data, d => d.imdbRating), d3.max(data, d => d.imdbRating)];
     } else {
-      d3.select('#full').classed('active', true);
-      d3.select('#zoom').classed('active', false);
+      return [0, 10];
     }
-    updateY();
-  });
+  }
 
-  d3.select('#fullDate').on('input', () => {
-    fullDate = !fullDate;
-    dateBtn = d3.select('#fullDate');
-    fullDate
-      ? dateBtn.classed('active', true)
-      : dateBtn.classed('active', false);
-    updateDate();
-  });
-
-  d3.select('#lucky').on('click', () => {
-    handleClick(
-      d3
-        .select(`#${filmIds[Math.floor(Math.random() * filmIds.length)]}`)
-        .datum()
-    );
-
-    document.querySelector('#lucky').blur();
-  });
-
-  d3.select('#avgRating').on('input', () => {
-    const meanLine = d3.select('.mean-line');
-    showMeanLine = !showMeanLine;
-    showMeanLine
-      ? meanLine.classed('hidden', false)
-      : meanLine.classed('hidden', true);
-  });
-
-  function updateDate() {
-    const xAxis = svg.select('.x-axis').transition();
-    let released = currentFilm ? currentFilm.Year : '';
-    if (currentFilm && currentFilm.Released !== 'N/A') {
-      released = currentFilm.Released;
-    }
+  function updateInfoDate(d) {
     const fullOptions = {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     };
+
+    if (fullDate) {
+      const date = d.Released !== 'N/A' ? d.Released : d.Year;
+      d3.select('#infoYear')
+        .classed('infoFullDate', true)
+        .text(date.toLocaleDateString('en-US', fullOptions));
+    } else {
+      d3.select('#infoYear')
+        .text(`(${d.Year})`)
+        .classed('infoFullDate', false);
+    }
+  }
+
+  function updateDate() {
+    const xAxis = svg.select('.x-axis').transition();
     let axisYear;
+
+    fullDate = !fullDate;
+    updateInfoDate(currentFilm);
 
     if (fullDate) {
       xAxis.call(
@@ -107,11 +120,6 @@ d3.json('./netflix_film_data.json').then(data => {
             }
           })
       );
-      if (released) {
-        d3.select('.info-year')
-          .text(released.toLocaleDateString('en-US', fullOptions).toUpperCase())
-          .classed('year', true);
-      }
       const ticks = d3.selectAll('.tick').nodes();
       for (let tick in ticks) {
         const thisTick = d3.select(ticks[tick]);
@@ -129,11 +137,6 @@ d3.json('./netflix_film_data.json').then(data => {
           .tickSize(0)
           .ticks(d3.timeYear)
       );
-      if (currentFilm) {
-        d3.select('.info-year')
-          .text(`(${currentFilm.Year})`)
-          .classed('year', false);
-      }
     }
   }
 
@@ -162,107 +165,25 @@ d3.json('./netflix_film_data.json').then(data => {
     svg
       .select('.mean-line')
       .transition()
-      .attr('x1', xScale(d3.min(data, d => d.Released)))
+      .attr('x1', xScale(data[0].Released))
       .attr('y1', yScale(mean))
-      .attr('x2', xScale(d3.max(data, d => d.Released)) + 20)
+      .attr('x2', xScale(data[data.length - 1].Released) + 20)
       .attr('y2', yScale(mean));
   }
 
-  function getYDomain() {
-    if (yScaleZoom) {
-      return [d3.min(data, d => d.imdbRating), d3.max(data, d => d.imdbRating)];
-    } else {
-      return [0, 10];
-    }
-  }
-
-  const xScale = d3
-    .scaleTime()
-    .domain([d3.min(data, d => d.Released), d3.max(data, d => d.Released)])
-    .range([0, width]);
-
-  const yScale = d3
-    .scaleLinear()
-    .domain(getYDomain())
-    .range([height, 0]);
-
-  const rScale = d3
-    .scaleLinear()
-    .domain([
-      d3.min(data, d => parseInt(d.imdbVotes.replace(',', ''))),
-      d3.max(data, d => parseInt(d.imdbVotes.replace(',', '')))
-    ])
-    .range([6, 18]);
-
-  const svg = d3
-    .select('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .append('g')
-    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-  svg
-    .append('g')
-    .attr('class', 'x-axis')
-    .attr('transform', 'translate(0,' + height + ')')
-    .call(
-      d3
-        .axisBottom(xScale)
-        .tickSize(0)
-        .ticks(d3.timeYear)
-    );
-
-  svg
-    .append('g')
-    .attr('class', 'y-axis')
-    .attr('transform', `translate(${chartPanelWidth})`)
-    .call(d3.axisLeft(yScale).tickSize(chartPanelWidth));
-
-  const getRadius = d => {
-    return rScale(parseInt(d.imdbVotes.replace(',', '')));
-  };
-
-  svg
-    .append('line')
-    .attr('x1', xScale(d3.min(data, d => d.Released)))
-    .attr('y1', yScale(mean))
-    .attr('x2', xScale(d3.max(data, d => d.Released)) + 20)
-    .attr('y2', yScale(mean))
-    .attr('class', 'mean-line hidden');
-
-  svg
-    .selectAll('.dot')
-    .data(data)
-    .enter()
-    .append('circle')
-    .attr('id', d => d.imdbID)
-    .attr('class', 'dot')
-    .attr('cx', d => xScale(d.Released))
-    .attr('cy', d => yScale(d.imdbRating))
-    .attr('r', d => getRadius(d))
-    .on('mouseover', handleMouseOver)
-    .on('mouseout', handleMouseOut)
-    .on('click', handleClick);
-
-  const tooltip = d3
-    .select('body')
-    .append('div')
-    .style('position', 'absolute')
-    .style('z-index', '10')
-    .style('visibility', 'hidden');
-
-  let chartPos = document.getElementById('chartPanel').getBoundingClientRect();
-
   function handleMouseOver(d) {
-    let tip = tooltip
+    let chartPos = document
+      .getElementById('chartPanel')
+      .getBoundingClientRect();
+    return tooltip
       .style('visibility', 'visible')
       .attr('id', d.imdbID)
       .style(
         'top',
         yScale(d.imdbRating) +
-          chartPos.top -
-          getRadius(d) +
-          margin.top +
+          chartPos.top +
+          margin.top -
+          rScale(parseInt(d.imdbVotes.replace(',', ''))) +
           3 +
           'px'
       )
@@ -282,23 +203,23 @@ d3.json('./netflix_film_data.json').then(data => {
       .style('left', '50%')
       .style('transform', 'translate(-50%, 0)')
       .style('bottom', '0');
-
-    return tip;
   }
 
   function handleMouseOut() {
     tooltip.selectAll('div').remove();
-    return tooltip.style('visibility', 'hidden');
+    tooltip.style('visibility', 'hidden');
   }
 
-  let currentFilm;
-
   function handleClick(d) {
-    currentFilm = d;
-    console.log(d);
     const fontSize = parseFloat(
       getComputedStyle(document.querySelector('#infoPanel')).fontSize
     );
+    const ratingsIds = {
+      'Internet Movie Database': '#imdbRating',
+      'Rotten Tomatoes': '#rottenTomatoesRating',
+      Metacritic: '#metacriticRating'
+    };
+    currentFilm = d;
 
     d3.selectAll('.dot-focus')
       .classed('dot-focus', false)
@@ -309,7 +230,7 @@ d3.json('./netflix_film_data.json').then(data => {
       .style('max-width', infoPanelWidth - fontSize * 2 + 'px')
       .attr('src', d.Poster);
 
-    d3.select('#poster-background')
+    d3.select('#posterBackground')
       .attr('src', d.Poster)
       .style('width', infoPanelWidth - fontSize * 2 + 'px');
 
@@ -322,32 +243,27 @@ d3.json('./netflix_film_data.json').then(data => {
       )
       .attr('target', '_blank');
 
-    d3.select('.info-rating-imdb')
+    d3.select('#infoImdbLink')
       .attr('href', `https://www.imdb.com/title/${d.imdbID}`)
       .attr('target', '_blank')
       .style('color', 'inherit');
 
-    d3.select('#infoTitle').html(`${d.Title} <span class="info-year"></span>`);
-    updateDate();
+    d3.select('#infoTitle').text(`${d.Title}`);
 
-    const ratingsIds = {
-      'Internet Movie Database': '#imdbRating',
-      'Rotten Tomatoes': '#rottenTomatoesRating',
-      Metacritic: '#metacriticRating'
-    };
+    updateInfoDate(d);
 
     for (let website in ratingsIds) {
       d3.select(ratingsIds[website]).text('—');
     }
 
     d.Ratings.forEach(r => {
-      console.log(d3.select(ratingsIds[r.Source]));
+      d3.select(ratingsIds[r.Source]).text('—');
       let rating = r.Value.slice(0, 3)
         .replace('%', '')
         .replace('/', '');
 
       if (r.Source === 'Rotten Tomatoes') {
-        rating = rating + ' %';
+        rating += ' %';
       }
 
       d3.select(ratingsIds[r.Source]).text(rating);
@@ -364,11 +280,131 @@ d3.json('./netflix_film_data.json').then(data => {
     d3.select('#infoPlot').text(d.Plot);
   }
 
-  window.addEventListener('load', () => {
-    handleClick(d3.select('#tt4357394').datum());
-    document.querySelector('#poster').addEventListener('load', () => {
-      document.querySelector('#infoPanel').classList.remove('hidden');
-    });
+  svg
+    .append('g')
+    .attr('class', 'x-axis')
+    .attr('transform', 'translate(0,' + height + ')')
+    .call(
+      d3
+        .axisBottom(xScale)
+        .tickSize(0)
+        .ticks(d3.timeYear)
+    );
+
+  svg
+    .append('g')
+    .attr('class', 'y-axis')
+    .attr('transform', `translate(${chartPanelWidth})`)
+    .call(d3.axisLeft(yScale).tickSize(chartPanelWidth));
+
+  svg
+    .append('line')
+    .attr('x1', xScale(data[0].Released))
+    .attr('y1', yScale(mean))
+    .attr('x2', xScale(data[data.length - 1].Released) + 20)
+    .attr('y2', yScale(mean))
+    .attr('class', 'mean-line hidden');
+
+  // Legend for dot radius
+  svg
+    .append('rect')
+    .attr('x', legendCoords[0])
+    .attr('y', legendCoords[1])
+    .attr('width', 130)
+    .attr('height', 86)
+    .classed('legend', true);
+
+  svg
+    .append('circle')
+    .attr('cx', legendCoords[0] + 21)
+    .attr('cy', legendCoords[1] + 46)
+    .attr('r', rScaleRange[0])
+    .classed('legend-dot', true);
+
+  svg
+    .append('circle')
+    .attr('cx', legendCoords[0] + 53)
+    .attr('cy', legendCoords[1] + 46)
+    .attr('r', (rScaleRange[0] + rScaleRange[1]) / 2)
+    .classed('legend-dot', true);
+
+  svg
+    .append('circle')
+    .attr('cx', legendCoords[0] + 95)
+    .attr('cy', legendCoords[1] + 46)
+    .attr('r', rScaleRange[1])
+    .classed('legend-dot', true);
+
+  svg
+    .append('text')
+    .text('Number of Votes')
+    .attr('x', legendCoords[0] + 13)
+    .attr('y', legendCoords[1] + 20)
+    .classed('legend-text', true);
+
+  svg
+    .append('text')
+    .text(`${minVotes.toLocaleString()}`)
+    .attr('x', legendCoords[0] + 13)
+    .attr('y', legendCoords[1] + 80)
+    .classed('legend-stat', true);
+
+  svg
+    .append('text')
+    .text(`${maxVotes.toLocaleString()}`)
+    .attr('x', legendCoords[0] + 69)
+    .attr('y', legendCoords[1] + 80)
+    .classed('legend-stat', true);
+
+  svg
+    .selectAll('.dot')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('id', d => d.imdbID)
+    .attr('class', 'dot')
+    .attr('cx', d => xScale(d.Released))
+    .attr('cy', d => yScale(d.imdbRating))
+    .attr('r', d => rScale(parseInt(d.imdbVotes.replace(',', ''))))
+    .on('mouseover', handleMouseOver)
+    .on('mouseout', handleMouseOut)
+    .on('click', handleClick);
+
+  d3.select('#zoomBtn').on('click', () => {
+    yScaleZoom = !yScaleZoom;
+    if (yScaleZoom) {
+      d3.select('#full').classed('active', false);
+      d3.select('#zoom').classed('active', true);
+    } else {
+      d3.select('#full').classed('active', true);
+      d3.select('#zoom').classed('active', false);
+    }
+    updateY();
   });
-  console.timeEnd('setup');
+
+  d3.select('#fullDate').on('input', () => {
+    updateDate();
+  });
+
+  d3.select('#lucky').on('click', () => {
+    handleClick(
+      d3
+        .select(`#${filmIds[Math.floor(Math.random() * filmIds.length)]}`)
+        .datum()
+    );
+    document.querySelector('#lucky').blur();
+  });
+
+  d3.select('#avgRating').on('input', () => {
+    const meanLine = d3.select('.mean-line');
+    isMeanLineVisible = !isMeanLineVisible;
+    isMeanLineVisible
+      ? meanLine.classed('hidden', false)
+      : meanLine.classed('hidden', true);
+  });
+
+  handleClick(d3.select('#tt4357394').datum());
+  document.querySelector('#poster').addEventListener('load', () => {
+    document.querySelector('#infoInner').classList.remove('hidden');
+  });
 });
