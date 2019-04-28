@@ -1,6 +1,7 @@
 import json
 import urllib.request
 import urllib.parse
+import os
 
 
 def parse_titles(films):
@@ -13,7 +14,7 @@ def parse_titles(films):
 def fetch_titles(titles):
     res = []
     for t in titles:
-        with urllib.request.urlopen("http://www.omdbapi.com/?" + urllib.parse.urlencode(t) + "&apikey=thewdb") as url:
+        with urllib.request.urlopen("http://www.omdbapi.com/?" + urllib.parse.urlencode(t) + "&apikey=" + os.environ.get('OMDB_API_KEY')) as url:
             data = json.loads(url.read().decode())
             res.append(data)
     return res
